@@ -31,6 +31,7 @@ SOFTWARE.
 #include <list>
 #include <unordered_map>
 #include <fstream>
+#include <sstream>
 #include <string>
 #endif // _WIN32
 #include "MyTime.h"
@@ -321,18 +322,11 @@ int ImplicitOrient(int depth, float pointweight, std::string fine_file, std::vec
 	while (1)
 	{
 		std::vector<Real> pn(6, 0);
-		ifs_fine >> pn[0] >> pn[1] >> pn[2];
+		ifs_fine >> pn[0] >> pn[1] >> pn[2] >> pn[3] >> pn[4] >> pn[5];
 		if (ifs_fine.peek() == EOF)
 		{
 			break;
 		}
-		char ch = ifs_fine.get();
-		if (ch == '\n')
-		{
-			std::cout <<"Unoriented normals are required for the fine point cloud, ./jet/normal_estimation.exe can estimate the unoriented normals.";
-			exit(1);
-		}
-		ifs_fine >> pn[3] >> pn[4] >> pn[5];
 		pn[0] = (pn[0] - _center[0]) / _scale;
 		pn[1] = (pn[1] - _center[1]) / _scale;
 		pn[2] = (pn[2] - _center[2]) / _scale;
@@ -555,6 +549,65 @@ int main(int argc, char** argv)
 	std::vector<std::vector<float>> coarse_normals;
 	std::vector<std::vector<float>> fine_points;
 	std::vector<std::vector<float>> fine_normals;
+
+	//Unoriented normals are required for coarse_filein and fine_filein
+	std::ifstream xyz_file;
+	xyz_file.open(coarse_filein);
+	if (!xyz_file)
+	{
+		std::cout << "Failed to read coarse xyz file." << std::endl;
+		exit(1);
+	}
+
+	std::string line;
+	while (std::getline(xyz_file, line))
+	{
+		std::istringstream iss(line);
+		float value;
+		std::vector<float> values;
+
+		while (iss >> value)
+		{
+			values.push_back(value);
+		}
+		if (values.size() != 6)
+		{
+			std::cout << "Unoriented normals are required for the coarse point cloud, ./jet/normal_estimation.exe can estimate the unoriented normals." << std::endl;
+			exit(1);
+		}
+	}
+	xyz_file.close();
+
+	if (use_implicit_orient)
+	{
+		xyz_file.open(fine_filein);
+		if (!xyz_file)
+		{
+			std::cout << "Failed to read fine xyz file." << std::endl;
+			exit(1);
+		}
+
+		std::string line;
+		while (std::getline(xyz_file, line))
+		{
+			std::istringstream iss(line);
+			float value;
+			std::vector<float> values;
+
+			while (iss >> value)
+			{
+				values.push_back(value);
+			}
+			if (values.size() != 6)
+			{
+				std::cout << "Unoriented normals are required for the fine point cloud, ./jet/normal_estimation.exe can estimate the unoriented normals." << std::endl;
+				exit(1);
+			}
+		}
+		xyz_file.close();
+	}
+
+
 	std::cout << "Start." << std::endl;
 	Orient_coarse<float, PlyValueVertex< float >>(coarse_orient_depth, coarse_filein, coarse_points, coarse_normals, alpha, beta, pointweight, oriented_optimized);
 	if (use_implicit_orient)
