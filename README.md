@@ -32,9 +32,9 @@ Following commands can run some examples:
 ./Bin/x64/Release/PoissonRecon.exe ./data/scissors4.xyz ./data/scissors4.xyz ./results/scissors4.ply false true true
 ```
 
-The main program requires unoriented normals, which can be estimated by "./jets/normals_estimation.exe" with the following command:
+The main program requires unoriented normals, which can be estimated by "./jet/normals_estimation.exe" with the following command:
 ``` bash
-./jets/normals_estimation.exe input_xyz output_xyz neighbour_size 
+./jet/normals_estimation.exe input_xyz output_xyz neighbour_size 
 ``` 
 This executable program is compiled by [CGAL 5.5.1](https://github.com/CGAL/cgal).
 
